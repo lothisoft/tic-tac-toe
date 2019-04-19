@@ -1,0 +1,65 @@
+.tic-tac-toe-board-parent {
+  width: 100%;
+
+  .tic-tac-toe-board {
+    width: 50vw;
+    height: 50vw;
+    margin: 0 auto;
+
+    display: grid;
+    grid-template: repeat(3, 1fr) / repeat(3, 1fr);
+    background-color: white;
+    box-shadow: 10px 10px 5px 0 rgba(0, 0, 0, 0.75);
+
+    .tile {
+      border: 2px solid rgb(132, 132, 132);
+
+      font-size: 7vmin;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      transition: .3s;
+      user-select: none;
+      cursor: not-allowed;
+    }
+
+    .top-row {
+      border-top: none;
+    }
+
+    .left-column {
+      border-left: none;
+    }
+
+    .right-column {
+      border-right: none;
+    }
+
+    .bottom-row {
+      border-bottom: none;
+    }
+
+    .click-able {
+      cursor: pointer;
+    }
+
+    .winning-tile {
+      background-color: lightgray;
+    }
+  }
+
+  .status-display {
+    max-width: 500px;
+    margin: 1em auto;
+
+    .status-message {
+      display: inline-block;
+    }
+
+    .new-game-button {
+      margin-left: 1em;
+    }
+  }
+}
+
+

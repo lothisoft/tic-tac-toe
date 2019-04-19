@@ -1,0 +1,25 @@
+.tic-tac-toe-score-board {
+  margin-bottom:1.5em;
+  box-shadow: 10px 10px 5px 0 rgba(0,0,0,0.75);
+  text-align: center;
+
+  .player-display, .vs-display {
+    display:inline-block;
+  }
+
+  .player-display {
+    width:40%;
+    .caption, .score {
+      margin: 1em 0;
+    }
+  }
+
+  .vs-display {
+    width:20%;
+    vertical-align: middle;
+  }
+
+  .clear-button {
+    margin-bottom:1em;
+  }
+}
