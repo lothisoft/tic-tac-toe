@@ -51,11 +51,11 @@ export class TicTacToeBoard extends React.Component {
     }
 
     /**
-     *  createNewBoard() returns an array with 9 entries all of which are undefined
+     *  createNewBoard() returns an array with 9 entries all of which are the tileId
      * @returns {undefined[]}
      */
     createNewBoard = () => {
-        return Array.from({length: 9}, () => {return undefined;});
+        return Array.from({length: 9}, (_,index) => {return index;});
     };
 
     /**
@@ -63,7 +63,6 @@ export class TicTacToeBoard extends React.Component {
      */
     newGameButtonClicked() {
         const newBoard = this.createNewBoard();
-
         // randomly determine which player does the next move
         const playerStartingTheNextGame = Math.floor(Math.random() * 2) + 1;
 
@@ -153,7 +152,8 @@ export class TicTacToeBoard extends React.Component {
     isGameADraw(board) {
         let isTheGameADraw = true;
         this.tileIds.forEach((tileId) => {
-            if (!board[tileId]) {
+            // if there is a number on the board it means that the field hasn't been clicked yet
+            if (typeof (board[tileId]) === "number") {
                 isTheGameADraw =false;
             }
         });
@@ -168,20 +168,7 @@ export class TicTacToeBoard extends React.Component {
      * @returns {*}
      */
     determineNextComputerMove(board) {
-        //adapt my data structures to the minimax implementation
-
-        const minimaxBoard = [];
-        board.forEach((_, index) => {
-            if (!board[index]) {
-                minimaxBoard.push(index);
-            } else {
-                minimaxBoard.push(board[index]);
-            }
-        });
-        // player marker
-        const player = this.playerMarker[this.computerPlayer-1];
-
-        return minimax(minimaxBoard, player).index;
+        return minimax(board, this.playerMarker[this.computerPlayer-1]).index;
     }
 
     /**
@@ -189,8 +176,8 @@ export class TicTacToeBoard extends React.Component {
      * @param tileId
      */
     tileClickHandler(tileId) {
-        // was the tile already selected or is no game being played
-        if (this.state.board[tileId] || !this.state.playerActive) {
+        // was the tile already selected (is there an X or O on the board?) or is no game being played
+        if (typeof (this.state.board[tileId]) !== "number" || !this.state.playerActive) {
             //yes, then don't make any changes
             return;
         }
@@ -278,16 +265,18 @@ export class TicTacToeBoard extends React.Component {
      * @returns {*}
      */
     renderSingleTile(tileId) {
+        console.log("Render: ", this.state);
         return (
             <div    key={tileId}
+                    id={typeof(this.state.board[tileId]) === "number" && this.state.board[tileId]}
                     className={cx("tile",   {"top-row":tileId<=2},
                                             {"left-column":tileId===0||tileId===3||tileId===6},
                                             {"right-column":tileId===2||tileId===5||tileId===8},
                                             {"bottom-row":tileId>=6},
-                                            {"click-able":(!this.state.board[tileId]) && this.state.playerActive} ,
+                                            {"click-able":(typeof(this.state.board[tileId]) === "number")  && this.state.playerActive} ,
                                             {"winning-tile": (this.state.winningTiles.length && this.state.winningTiles.findIndex((id) => {return id===tileId}) !== -1) })}
                     onClick={() => { return this.tileClickHandler(tileId);}}>
-                {this.state.board[tileId]}
+                {typeof(this.state.board[tileId]) !== "number" && this.state.board[tileId]}
             </div>
         );
     };
