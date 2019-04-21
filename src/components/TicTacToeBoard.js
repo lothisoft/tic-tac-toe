@@ -29,6 +29,7 @@ export class TicTacToeBoard extends React.Component {
     statusMessages = {
         NewGame:"Click the New Game button to start a new game -->",
         humanPlayerTurn:"It's the Human's (X) turn",
+        computerPlayerTurn:"It's the Computer's (X) turn",
         Draw:"The game is a draw" ,
         HumanWins: "Human (X) wins",
         ComputerWins: "Computer (O) wins"
@@ -110,15 +111,17 @@ export class TicTacToeBoard extends React.Component {
     /**
      * wasGameWon() returns an object with the winner and the winning scenario if the game was won, otherwise null
      * @param board
+     * @param player
      * @returns {{winner: number, scenario: number[]}|null}
      */
-    wasGameWon(board) {
+    wasGameWon(board, player) {
+        const playerMarker = this.playerMarker[player-1];
         const winningScenario = this.possibleWinScenarios.find((winScenario) => {
             if ((board[winScenario[0]] ===
                 board[winScenario[1]] &&
                 board[winScenario[1]] ===
                 board[winScenario[2]]) &&
-                board[winScenario[0]]) {
+                board[winScenario[0]] === playerMarker) {
                 return true;
             }
             return false;
@@ -127,21 +130,10 @@ export class TicTacToeBoard extends React.Component {
         if (!winningScenario) {
             return null;
         }
-
-        // somebody did win, but who?
-        const symbol = board[winningScenario[0]];
-
-        if (symbol === this.playerMarker[this.humanPlayer - 1]) {
-            return {
-                winner:this.humanPlayer,
-                scenario: winningScenario
-            };
-        } else {
-            return {
-                winner: this.computerPlayer,
-                scenario: winningScenario
-            };
-        }
+        return {
+            winner:player,
+            scenario: winningScenario
+        };
     };
 
     /**
@@ -176,6 +168,23 @@ export class TicTacToeBoard extends React.Component {
      * @param tileId
      */
     tileClickHandler(tileId) {
+
+        /**
+         * Simulate a click event.
+         * @public
+         * @param {Element} elem  the element to simulate a click on
+         * from: https://gomakethings.com/how-to-simulate-a-click-event-with-javascript/
+         */
+        function simulateClick(elem) {
+            // Create a click event programmatically
+            const evt = new MouseEvent('click', {
+                bubbles: true,
+                cancelable: true,
+                view: window
+            });
+            elem.dispatchEvent(evt);
+        }
+
         // was the tile already selected (is there an X or O on the board?) or is no game being played
         if (typeof (this.state.board[tileId]) !== "number" || !this.state.playerActive) {
             //yes, then don't make any changes
@@ -185,24 +194,27 @@ export class TicTacToeBoard extends React.Component {
         // get the current board
         const board = this.state.board;
         //update the board in memory
-        board[tileId] = this.playerMarker[this.humanPlayer-1];
+        board[tileId] = this.playerMarker[this.state.playerActive - 1];
 
-        // check if the human one
-        const didHumanPlayerWin = this.wasGameWon(board);
-        if (didHumanPlayerWin) {
-            // and if the human did, record the win and update the state
-            this.recordWin(this.humanPlayer);
+        // check if the active player won
+        const didPlayerWin = this.wasGameWon(board, this.state.playerActive);
+        if (didPlayerWin) {
+            let statusMessage = this.statusMessages.ComputerWins;
+            if (this.state.playerActive === this.humanPlayer) {
+                statusMessage = this.statusMessages.HumanWins;
+            }
+            this.recordWin(this.state.playerActive);
             this.setState({
-                board:board,
-                winningTiles:didHumanPlayerWin.scenario,
+                board: board,
+                winningTiles: didPlayerWin.scenario,
                 playerActive: 0,
-                statusMessage: this.statusMessages.HumanWins
+                statusMessage: statusMessage
             });
             // and we are done here
             return;
         }
 
-        // is the game a draw?
+        // or was the the game a draw?
         if (this.isGameADraw(board)) {
             // yes, the game is a draw
             // update the board
@@ -215,46 +227,31 @@ export class TicTacToeBoard extends React.Component {
             return;
         }
 
-        // the human hasn't won yet, so let the computer make the next move
-        const nextComputerMove = this.determineNextComputerMove(board, this.computerPlayer);
-        // and update the board in memory
-        board[nextComputerMove] = this.playerMarker[this.computerPlayer-1];
-
-        // did the computer win?
-        const didComputerWin = this.wasGameWon(board);
-        if (didComputerWin)  {
-            // yes, the computer won
-            // record the win for the display
-            this.recordWin(this.computerPlayer);
-            // and update the board
-            this.setState({
-                board:board,
-                winningTiles:didComputerWin.scenario,
-                playerActive: 0,
-                statusMessage: this.statusMessages.ComputerWins
-            });
-            // and we are done here
-            return;
+        // the game is still on, the next player is now up
+        let nextPlayer = this.humanPlayer;
+        let nextStatusMessage = this.statusMessages.humanPlayerTurn;
+        if (this.state.playerActive === this.humanPlayer) {
+            nextPlayer = this.computerPlayer;
+            nextStatusMessage = this.statusMessages.computerPlayerTurn
         }
 
-        // is the game a draw?
-        if (this.isGameADraw(board)) {
-            //yes, game is a draw
-            this.setState({
-                board: board,
-                playerActive: 0,
-                statusMessage: this.statusMessages.Draw
-            });
-            return;
-        }
-
-        // the game is still on, the player is now up
         this.setState({
             board: board,
-            playerActive: this.humanPlayer,
-            statusMessage: this.statusMessages.humanPlayerTurn
+            playerActive: nextPlayer,
+            statusMessage: nextStatusMessage
+        }, () => {
+            if (this.state.playerActive === this.humanPlayer) {
+                // for the human player, wait for his mouse click
+                return;
+            }
+            // for the computer,
+            // determine the next move
+            const nextComputerMove = this.determineNextComputerMove(board, this.computerPlayer);
+            //and simulate the mouse click on the tile
+            simulateClick(document.getElementById(`${nextComputerMove}`));
         });
-    };
+    }
+
 
     /**
      * renderSingleTile() renders one tile.  The tile id determines the position of the tile on the board and set's the
