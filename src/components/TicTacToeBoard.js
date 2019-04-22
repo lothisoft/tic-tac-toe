@@ -188,6 +188,7 @@ export class TicTacToeBoard extends React.Component {
         }
 
         // was the tile already selected (is there an X or O on the board?) or is no game being played
+        // this should never happen but just in case
         if (typeof (this.state.board[tileId]) !== "number" || !this.state.playerActive) {
             //yes, then don't make any changes
             return;
@@ -198,63 +199,87 @@ export class TicTacToeBoard extends React.Component {
         //update the board in memory
         board[tileId] = this.playerMarker[this.state.playerActive - 1];
 
-        // check if the active player won
-        const didPlayerWin = this.wasGameWon(board, this.state.playerActive);
-        if (didPlayerWin) {
-            let statusMessage = this.statusMessages.ComputerWins;
-            if (this.state.playerActive === this.humanPlayer) {
-                statusMessage = this.statusMessages.HumanWins;
-            }
-            this.recordWin(this.state.playerActive);
-            this.setState({
-                board: board,
-                winningTiles: didPlayerWin.scenario,
-                playerActive: 0,
-                statusMessage: statusMessage,
-                isTheBoardClickable:false
-            });
-            // and we are done here
-            return;
-        }
+        // now, turn off the click handlers for the entire board
+        this.setState({isTheBoardClickable: false},
 
-        // or was the the game a draw?
-        if (this.isGameADraw(board)) {
-            // yes, the game is a draw
-            // update the board
-            this.setState({
-                board: board,
-                playerActive: 0,
-                statusMessage: this.statusMessages.Draw,
-                isTheBoardClickable:false
-            });
-            // and we are done here
-            return;
-        }
+            () => {
+                // the state has been updated, the board click handler are all disabled
+                // check if the active player won
+                const didPlayerWin = this.wasGameWon(board, this.state.playerActive);
+                if (didPlayerWin) {
+                    let statusMessage = this.statusMessages.ComputerWins;
+                    if (this.state.playerActive === this.humanPlayer) {
+                        statusMessage = this.statusMessages.HumanWins;
+                    }
+                    this.recordWin(this.state.playerActive);
+                    this.setState({
+                        board: board,
+                        winningTiles: didPlayerWin.scenario,
+                        playerActive: 0,
+                        statusMessage: statusMessage,
+                        isTheBoardClickable: false
+                    });
+                    // and we are done here
+                    return;
+                }
 
-        // the game is still on, the next player is now up
-        let nextPlayer = this.humanPlayer;
-        let nextStatusMessage = this.statusMessages.humanPlayerTurn;
-        if (this.state.playerActive === this.humanPlayer) {
-            nextPlayer = this.computerPlayer;
-            nextStatusMessage = this.statusMessages.computerPlayerTurn
-        }
+                // or was the the game a draw?
+                if (this.isGameADraw(board)) {
+                    // yes, the game is a draw
+                    // update the board
+                    this.setState({
+                        board: board,
+                        playerActive: 0,
+                        statusMessage: this.statusMessages.Draw,
+                        isTheBoardClickable: false
+                    });
+                    // and we are done here
+                    return;
+                }
 
-        this.setState({
-            board: board,
-            playerActive: nextPlayer,
-            statusMessage: nextStatusMessage
-        }, () => {
-            if (this.state.playerActive === this.humanPlayer) {
-                // for the human player, wait for his mouse click
-                return;
-            }
-            // for the computer,
-            // determine the next move
-            const nextComputerMove = this.determineNextComputerMove(board, this.computerPlayer);
-            //and simulate the mouse click on the tile
-            simulateClick(document.getElementById(`${nextComputerMove}`));
-        });
-    }
+                // the game is still on, the next player is now up
+                let nextPlayer = this.humanPlayer;
+                let nextStatusMessage = this.statusMessages.humanPlayerTurn;
+                if (this.state.playerActive === this.humanPlayer) {
+                    nextPlayer = this.computerPlayer;
+                    nextStatusMessage = this.statusMessages.computerPlayerTurn
+                }
+
+                this.setState({
+                    board: board,
+                    playerActive: nextPlayer,
+                    statusMessage: nextStatusMessage,
+                    isTheBoardClickable: nextPlayer === this.humanPlayer ? true : false
+                }, () => {
+                    if (this.state.playerActive === this.humanPlayer) {
+                        // for the human player, wait for his mouse click
+                        // so we are done here and can just exit
+                        return;
+                    }
+
+                    // but if the computer is the next player
+                    // the timeout here is to simulate a lag between the human click handling and waiting for the
+                    // computer's move
+                    setTimeout(() => {
+                        // determine the next move
+                        const nextComputerMove = this.determineNextComputerMove(board, this.computerPlayer);
+                        // if determineNextComputerMove() would take a long time, which it doesn't, it could be made asynchronous
+
+                        // make the board clickable again
+                        this.setState({
+                                isTheBoardClickable: true
+                            }, () => {
+                                // the board is now clickable again
+                                // now simulate the mouse click by the computer on the tile
+                                simulateClick(document.getElementById(`${nextComputerMove}`));
+                            });
+                    }, 1000);
+
+                })
+            })
+    };
+
+
 
 
     /**
