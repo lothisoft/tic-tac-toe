@@ -54,7 +54,7 @@ export class TicTacToeBoard extends React.Component {
 
     /**
      *  createNewBoard() returns an array with 9 entries all of which are the tileId
-     * @returns {undefined[]}
+     * @returns {[]}
      */
     createNewBoard = () => {
         return Array.from({length: 9}, (_,index) => {return index;});
@@ -119,14 +119,12 @@ export class TicTacToeBoard extends React.Component {
     wasGameWon(board, player) {
         const playerMarker = this.playerMarker[player-1];
         const winningScenario = this.possibleWinScenarios.find((winScenario) => {
-            if ((board[winScenario[0]] ===
+            return (board[winScenario[0]] ===
                 board[winScenario[1]] &&
                 board[winScenario[1]] ===
                 board[winScenario[2]]) &&
-                board[winScenario[0]] === playerMarker) {
-                return true;
-            }
-            return false;
+                board[winScenario[0]] === playerMarker;
+
         });
 
         if (!winningScenario) {
@@ -156,7 +154,7 @@ export class TicTacToeBoard extends React.Component {
 
 
     /**
-     * determineNextComputerMove() is passed the current board and returnd the next best move for the computer
+     * determineNextComputerMove() is passed the current board and returns the next best move for the computer
      * based on an implementation of the Minimax algorithm
      * @param board
      * @returns {*}
@@ -249,7 +247,7 @@ export class TicTacToeBoard extends React.Component {
                     board: board,
                     playerActive: nextPlayer,
                     statusMessage: nextStatusMessage,
-                    isTheBoardClickable: nextPlayer === this.humanPlayer ? true : false
+                    isTheBoardClickable: nextPlayer === this.humanPlayer
                 }, () => {
                     if (this.state.playerActive === this.humanPlayer) {
                         // for the human player, wait for his mouse click
@@ -284,8 +282,8 @@ export class TicTacToeBoard extends React.Component {
 
     /**
      * renderSingleTile() renders one tile.  The tile id determines the position of the tile on the board and set's the
-     * className properties according to the position on the board.  The tile is clickable if it has no content and
-     * one player is active.
+     * className properties according to the position on the board.  The tile is clickable if the tile has a numeric content
+     * and if the board is clickable
      *
      * @param tileId  The id of the tile
      * @returns {*}
