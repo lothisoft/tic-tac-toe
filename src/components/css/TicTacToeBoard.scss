@@ -1,8 +1,10 @@
 .tic-tac-toe-board-parent {
   width: 100%;
 
+  $child-width: 50vw;
+
   .tic-tac-toe-board {
-    width: 50vw;
+    width: $child-width;
     height: 50vw;
     margin: 0 auto;
 
@@ -49,7 +51,7 @@
   }
 
   .status-display {
-    width: 50vw;
+    width: $child-width;
     margin: 1.5em auto;
 
     .status-message {
