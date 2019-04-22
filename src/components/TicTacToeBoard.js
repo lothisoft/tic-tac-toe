@@ -275,8 +275,7 @@ export class TicTacToeBoard extends React.Component {
                                             {"bottom-row":tileId>=6},
                                             {"click-able":(typeof(this.state.board[tileId]) === "number")  && this.state.isTheBoardClickable} ,
                                             {"winning-tile": (this.state.winningTiles.length && this.state.winningTiles.findIndex((id) => {return id===tileId}) !== -1) })}
-                    onClick={() => { if (this.state.isTheBoardClickable) {return this.tileClickHandler(tileId);}}}
-            >
+                    onClick={() => {(this.state.isTheBoardClickable) && (typeof(this.state.board[tileId]) === "number") && this.tileClickHandler(tileId)}}>
                 {typeof(this.state.board[tileId]) !== "number" && this.state.board[tileId]}
             </div>
         );
