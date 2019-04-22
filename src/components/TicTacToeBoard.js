@@ -29,7 +29,7 @@ export class TicTacToeBoard extends React.Component {
     statusMessages = {
         NewGame:"Click the New Game button to start a new game -->",
         humanPlayerTurn:"It's the Human's (X) turn",
-        computerPlayerTurn:"It's the Computer's (X) turn",
+        computerPlayerTurn:"It's the Computer's (O) turn",
         Draw:"The game is a draw" ,
         HumanWins: "Human (X) wins",
         ComputerWins: "Computer (O) wins"
