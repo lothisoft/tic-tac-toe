@@ -164,6 +164,18 @@ export class TicTacToeBoard extends React.Component {
     }
 
     /**
+     * wait() waits for at least the number of milliseconds passed in as a parameter
+     * @param ms
+     * @returns {Promise<*>}
+     */
+
+    async wait(ms) {
+        return new Promise(resolve => {
+            setTimeout(resolve, ms);
+        });
+    }
+
+    /**
      * setStateAsync() returns a promise which is resolved once the state has been updated
      * @param newState
      * @returns {Promise<any>}
@@ -269,17 +281,17 @@ export class TicTacToeBoard extends React.Component {
         // but if the computer is the next player
         // the timeout here is to simulate a lag between the human click handling and waiting for the
         // computer's move
-        setTimeout(async () => {
-            // determine the next move
-            const nextComputerMove = this.determineNextComputerMove(board, this.computerPlayer);
-            // if determineNextComputerMove() would take a long time, which it doesn't, it could be made asynchronous
+        await this.wait(1000);
 
-            // make the board clickable again
-            await this.setStateAsync({isTheBoardClickable: true});
-            // the board is now clickable again
-            // now simulate the mouse click by the computer on the tile
-            simulateClick(document.getElementById(`${nextComputerMove}`));
-        }, 1000);
+        // determine the next move
+        const nextComputerMove = this.determineNextComputerMove(board, this.computerPlayer);
+        // if determineNextComputerMove() would take a long time, which it doesn't, it could be made asynchronous
+
+        // make the board clickable again
+        await this.setStateAsync({isTheBoardClickable: true});
+        // the board is now clickable again
+        // now simulate the mouse click by the computer on the tile
+        simulateClick(document.getElementById(`${nextComputerMove}`));
     }
 
     /**
